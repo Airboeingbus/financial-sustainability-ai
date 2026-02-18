@@ -626,6 +626,10 @@
       <a href="/agents" onclick="event.preventDefault(); window.location.href='/agents';">Agent Workflow</a>
       <a href="#analytics">Analytics</a>
       <a href="#insights">AI Insights</a>
+      <a href="/sam-demo" onclick="event.preventDefault(); window.location.href='/sam-demo';">
+  Navan AI + SAM
+</a>
+
     </nav>
   </header>
 
@@ -833,8 +837,8 @@
       const hasSettlementData = settlementData.has_data;
 
       // Detect anomalies
-      const hasAuthAnomaly = authDataPoints.some(val => val > authThreshold * 0.85);
-      const hasSettlementAnomaly = settlementDataPoints.some(val => val > settlementThreshold * 0.85);
+      const hasAuthAnomaly = authDataPoints.some(val => val > authThreshold);
+      const hasSettlementAnomaly = settlementDataPoints.some(val => val > settlementThreshold);
 
       // 🆕 SHOW ANOMALY BADGE
       if (hasAuthAnomaly || hasSettlementAnomaly) {
