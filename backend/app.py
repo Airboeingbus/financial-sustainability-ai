@@ -477,7 +477,7 @@ def debug_cache():
 # -------------------- MAIN --------------------
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 7860))
     print(f"🚀 Starting Visa Payment Intelligence Platform on port {port}")
     print(f"📁 Base directory: {BASE_DIR}")
     print(f"🔍 Debug endpoint available at: http://localhost:{port}/debug/cache")
