@@ -478,11 +478,4 @@ def debug_cache():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
-    print(f"🚀 Starting Visa Payment Intelligence Platform on port {port}")
-    print(f"📁 Base directory: {BASE_DIR}")
-    print(f"🔍 Debug endpoint available at: http://localhost:{port}/debug/cache")
-    
-    # Increase max content length to handle larger files (50MB)
-    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
-    
     app.run(host="0.0.0.0", port=port)
