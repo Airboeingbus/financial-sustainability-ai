@@ -305,6 +305,13 @@ def clear_logs_api():
     })
 
 
+# -------------------- NAVAN AI --------------------
+@app.route("/sam-demo")
+def sam_demo():
+    return render_template("sam_demo.html")
+
+
+
 # -------------------- CHART DATA API --------------------
 
 @app.route("/chart-data", methods=["GET"])
@@ -470,5 +477,12 @@ def debug_cache():
 # -------------------- MAIN --------------------
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860))
-    app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"🚀 Starting Visa Payment Intelligence Platform on port {port}")
+    print(f"📁 Base directory: {BASE_DIR}")
+    print(f"🔍 Debug endpoint available at: http://localhost:{port}/debug/cache")
+    
+    # Increase max content length to handle larger files (50MB)
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
+    
+    app.run(host="0.0.0.0", port=port, debug=True, threaded=True)
