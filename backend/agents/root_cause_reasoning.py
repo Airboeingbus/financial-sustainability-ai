@@ -50,16 +50,12 @@ OPTIMIZATION_RECOMMENDATION → operational or sustainability improvements
 Respond in clear business language.
 """
 
-        response = client.responses.create(
-            model="gpt-4.1-mini",
-            input=prompt,
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.2
         )
-
-        if hasattr(response, "output_text") and response.output_text:
-            return response.output_text
-
-        return fallback_reasoning(intent, context)
+        return response.choices[0].message.content.strip()
 
     except Exception:
 

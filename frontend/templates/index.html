@@ -1393,18 +1393,26 @@ async function uploadFile() {
 
   fill.style.width = "40%";
 
-  const res = await fetch("/analyze", {
-    method: "POST",
-    body: formData
-});
+  try {
+    const res = await fetch("/analyze", {
+      method: "POST",
+      body: formData
+    });
 
-  const data = await res.json();
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    const data = await res.json();
+    if (!data || data.error) throw new Error(data.error || "Analysis failed");
 
-  fill.style.width = "100%";
-
-  btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Analysis Complete';
-
-  updateDashboard(data);
+    fill.style.width = "100%";
+    btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Analysis Complete';
+    updateDashboard(data);
+  } catch (err) {
+    fill.style.width = "0%";
+    btn.innerHTML = '<i class="bi bi-exclamation-circle"></i> Failed';
+    btn.disabled = false;
+    alert("Error: " + err.message);
+    return;
+  }
 
   setTimeout(() => {
       showSection("dashboard");

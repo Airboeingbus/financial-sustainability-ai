@@ -35,34 +35,18 @@ def _load_index():
 def embed_texts(texts, tag: str = "GENERAL"):
     """
     Embed text(s) and store in FAISS.
-
-    Args:
-        texts (str | list[str])
-        tag (str): semantic tag
-
-    Returns:
-        np.ndarray embeddings
     """
-
     if isinstance(texts, str):
         texts = [texts]
 
     tagged_texts = [f"[{tag}] {t}" for t in texts]
-
     model = _load_model()
     index = _load_index()
-
     embeddings = model.encode(tagged_texts)
-
     embeddings = np.array(embeddings).astype("float32")
-
-    # normalize vectors for cosine similarity
     faiss.normalize_L2(embeddings)
-
     index.add(embeddings)
-
     _documents.extend(tagged_texts)
-
     return embeddings
 
 
