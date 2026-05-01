@@ -1,11 +1,8 @@
 """
 Counterfactual Simulation Agent
 --------------------------------
-Simulates "what-if" operational scenarios for Visa payment networks.
-
-This agent does NOT predict the future.
-It provides directional, explainable alternative outcomes
-based on observed authorization and settlement behavior.
+Simulates "what-if" sustainability and financial risk scenarios
+for the SustainAI platform.
 """
 
 from datetime import datetime
@@ -17,89 +14,97 @@ def simulate_counterfactual(
     root_cause: str,
     anomalies: Optional[List[dict]] = None
 ) -> Dict:
-    """
-    Simulate alternate outcomes based on detected issues.
-
-    Args:
-        intent (str): Classified user intent
-        root_cause (str): Explanation from Root Cause Reasoning Agent
-        anomalies (list): Detected anomalies (optional)
-
-    Returns:
-        dict: Counterfactual simulation result (UI-compatible with scenario, impact, risk)
-    """
 
     rc = (root_cause or "").lower()
     intent = (intent or "").upper()
     anomalies = anomalies or []
 
     # ---------------------------------
-    # AUTHORIZATION COUNTERFACTUALS
+    # CARBON EXPOSURE SCENARIO
     # ---------------------------------
-    if "authorization" in rc or "decline" in rc:
+    if "carbon" in rc or "emission" in rc or "energy" in rc:
         return {
-            "scenario": "Authorization rule relaxation by 2% on decline thresholds",
-            "impact": "+1.8% authorization approval rate during peak hours (estimated 1,200 additional approved transactions daily)",
-            "risk": "Medium fraud exposure increase (+0.3% potential fraud rate), mitigated through time-bound regional tuning",
-            "confidence": "Medium",
+            "scenario": "Reduce exposure to high-carbon sectors by 20%",
+            "impact": "Estimated +9 point improvement in sustainability score and 28% reduction in climate transition risk",
+            "risk": "Short-term portfolio volatility due to sector rebalancing",
+            "confidence": "High",
+            "category": "Climate Risk Simulation",
             "generated_at": datetime.utcnow().isoformat()
         }
 
     # ---------------------------------
-    # SETTLEMENT COUNTERFACTUALS
+    # ESG IMPROVEMENT SCENARIO
+    # ---------------------------------
+    if "esg" in rc or "sustainability" in rc:
+        return {
+            "scenario": "Increase ESG-compliant asset allocation by 15%",
+            "impact": "Projected ESG score increase from 74 → 86 and improved sustainability ranking",
+            "risk": "Requires portfolio restructuring and additional ESG data monitoring",
+            "confidence": "High",
+            "category": "Sustainability Optimization",
+            "generated_at": datetime.utcnow().isoformat()
+        }
+
+    # ---------------------------------
+    # GREEN BOND INVESTMENT SCENARIO
+    # ---------------------------------
+    if "green bond" in rc or "sustainable investment" in rc:
+        return {
+            "scenario": "Increase green bond allocation from 12% to 20%",
+            "impact": "Improved sustainability rating and projected +1.5% long-term portfolio stability",
+            "risk": "Market liquidity constraints in emerging green bond markets",
+            "confidence": "Medium-High",
+            "category": "Sustainable Finance Strategy",
+            "generated_at": datetime.utcnow().isoformat()
+        }
+
+    # ---------------------------------
+    # FINANCIAL OPERATIONAL SCENARIO
+    # ---------------------------------
+    if "decline" in rc or "authorization" in rc:
+        return {
+            "scenario": "Adjust transaction authorization thresholds by 1.5%",
+            "impact": "+1.4% improvement in transaction approval rates",
+            "risk": "Potential increase in fraud exposure if thresholds are relaxed excessively",
+            "confidence": "Medium",
+            "category": "Financial Operations",
+            "generated_at": datetime.utcnow().isoformat()
+        }
+
+    # ---------------------------------
+    # SETTLEMENT EFFICIENCY SCENARIO
     # ---------------------------------
     if "settlement" in rc or "delay" in rc:
         return {
-            "scenario": "Settlement batching moved 45 minutes earlier across EMEA region",
-            "impact": "-35% average clearing latency (from 1.9h to 1.2h), improved reconciliation consistency by 12%",
-            "risk": "Requires coordination across 8 regional clearing houses and tighter operational windows",
-            "confidence": "Medium-High",
-            "generated_at": datetime.utcnow().isoformat()
-        }
-
-    # ---------------------------------
-    # PERFORMANCE / SYSTEMIC ISSUES
-    # ---------------------------------
-    if intent in {"PERFORMANCE_REPORT", "OPTIMIZATION_RECOMMENDATION"}:
-        return {
-            "scenario": "Cross-layer authorization-settlement optimization with unified risk scoring",
-            "impact": "+2.3% network throughput, -18% processing variance, improved system stability score from 87% to 94%",
-            "risk": "Increased dependency between issuer risk teams and settlement operations (requires 3-team coordination)",
+            "scenario": "Optimize settlement batching and regional clearing times",
+            "impact": "-30% average settlement delay and improved liquidity flow",
+            "risk": "Operational coordination required across multiple clearing partners",
             "confidence": "Medium",
+            "category": "Operational Efficiency",
             "generated_at": datetime.utcnow().isoformat()
         }
 
     # ---------------------------------
-    # NETWORK-LEVEL COUNTERFACTUALS
+    # ANOMALY-DRIVEN SCENARIO
     # ---------------------------------
-    if "network" in rc or "issuer" in rc:
+    if anomalies and len(anomalies) >= 3:
         return {
-            "scenario": "Dynamic issuer routing adjustment based on real-time approval rates",
-            "impact": "+1.5% overall network approval rate by routing to higher-performing issuers during congestion",
-            "risk": "Potential issuer relationship strain if routing appears biased (requires transparent communication)",
+            "scenario": "Deploy real-time AI anomaly monitoring across financial streams",
+            "impact": "Early detection of financial and sustainability risks, reducing incident response time by 40%",
+            "risk": "Requires additional compute resources for continuous monitoring",
             "confidence": "Medium",
+            "category": "Risk Monitoring",
             "generated_at": datetime.utcnow().isoformat()
         }
 
     # ---------------------------------
-    # FRAUD/RISK COUNTERFACTUALS
-    # ---------------------------------
-    if "fraud" in rc or "risk" in rc:
-        return {
-            "scenario": "Stricter velocity checks on high-risk merchant categories",
-            "impact": "-24% fraud incidents in flagged categories, -$180K estimated fraud losses over 30 days",
-            "risk": "Potential -0.8% authorization approval rate in affected categories (requires merchant communication)",
-            "confidence": "High",
-            "generated_at": datetime.utcnow().isoformat()
-        }
-
-    # ---------------------------------
-    # FALLBACK COUNTERFACTUAL
+    # FALLBACK
     # ---------------------------------
     return {
-        "scenario": "No high-impact alternative scenario detected from current data",
-        "impact": "Based on available authorization and settlement signals, alternative operational decisions would not materially improve outcomes beyond ±0.5%",
-        "risk": "Negligible - current configuration appears optimal for observed patterns",
+        "scenario": "Current financial and sustainability configuration appears stable",
+        "impact": "No significant improvement predicted beyond ±1% change in sustainability score",
+        "risk": "Low operational risk detected",
         "confidence": "Low",
+        "category": "Baseline Analysis",
         "generated_at": datetime.utcnow().isoformat()
     }

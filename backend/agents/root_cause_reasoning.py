@@ -4,38 +4,48 @@ from openai import OpenAI
 
 def explain_root_cause(query, context, intent):
     """
-    Intent-aware GenAI reasoning for Visa payment intelligence.
-    Falls back to deterministic logic if LLM unavailable.
+    Intent-aware AI reasoning for SustainAI financial
+    and sustainability risk intelligence.
+
+    Uses LLM when available, otherwise deterministic fallback.
     """
 
     api_key = os.getenv("OPENAI_API_KEY")
 
-    # -------- SAFE FALLBACK IF NO KEY --------
+    # -----------------------------
+    # SAFE FALLBACK IF NO API KEY
+    # -----------------------------
     if not api_key:
         return fallback_reasoning(intent, context)
 
     try:
+
         client = OpenAI(api_key=api_key)
 
         prompt = f"""
-You are an autonomous Visa payment network intelligence agent.
+You are an AI sustainability and financial risk intelligence analyst.
 
-User Intent:
+User Query:
+{query}
+
+Intent:
 {intent}
 
-Context (retrieved from authorization and/or settlement reports):
+Context from uploaded financial reports:
 {context}
 
 Instructions:
-- Respond strictly according to the intent
-- Use Visa network terminology
-- Be concise, operational, and decision-focused
+- Identify the most likely root cause behind the detected anomaly or pattern.
+- Consider financial metrics, operational signals, and sustainability indicators.
+- Provide concise reasoning suitable for executive dashboards.
 
-Intent-specific guidance:
-- AUTH_TRENDS → issuer behavior, approval rates, decline patterns
-- SETTLEMENT_ANALYSIS → clearing, settlement latency, reconciliation
-- PERFORMANCE_REPORT → end-to-end network health and throughput
-- OPTIMIZATION_RECOMMENDATION → concrete operational actions only
+Intent guidance:
+
+ESG_ANALYSIS → sustainability risks, ESG score drivers  
+CLIMATE_RISK → carbon exposure, emission risk, energy sector concentration  
+ANOMALY_DETECTION → unusual transaction patterns or abnormal metrics  
+PERFORMANCE_REPORT → overall financial system health  
+OPTIMIZATION_RECOMMENDATION → operational or sustainability improvements
 
 Respond in clear business language.
 """
@@ -46,63 +56,102 @@ Respond in clear business language.
             temperature=0.2
         )
 
-        # ✅ Safe extraction (prevents crashes)
         if hasattr(response, "output_text") and response.output_text:
             return response.output_text
 
         return fallback_reasoning(intent, context)
 
     except Exception:
-        # -------- ABSOLUTE DEMO SAFETY --------
+
+        # absolute demo safety
         return fallback_reasoning(intent, context)
 
 
-# -------------------- FALLBACK LOGIC --------------------
+# ----------------------------------------------------
+# FALLBACK REASONING
+# ----------------------------------------------------
 
 def fallback_reasoning(intent, context):
-    """
-    Deterministic, intent-based fallback reasoning.
-    Ensures query-sensitive behavior even without LLM.
-    """
 
-    c = context.lower()
+    c = str(context).lower()
 
-    if intent == "AUTH_TRENDS":
+    # -----------------------------
+    # ESG / Sustainability
+    # -----------------------------
+    if intent == "ESG_ANALYSIS":
+
+        if "esg" in c and "low" in c:
+            return (
+                "The ESG score decline appears linked to increased exposure "
+                "to lower-rated sectors or insufficient sustainability reporting."
+            )
+
+        return (
+            "Current ESG metrics indicate moderate sustainability exposure "
+            "with potential risk arising from sector concentration."
+        )
+
+    # -----------------------------
+    # Climate risk
+    # -----------------------------
+    if intent == "CLIMATE_RISK":
+
+        if "carbon" in c or "emission" in c:
+            return (
+                "Elevated carbon intensity suggests significant exposure to "
+                "high-emission sectors, increasing climate transition risk."
+            )
+
+        return (
+            "Climate exposure appears stable with no immediate emission-driven risks."
+        )
+
+    # -----------------------------
+    # Financial anomaly
+    # -----------------------------
+    if intent == "ANOMALY_DETECTION":
+
         if "decline" in c:
             return (
-                "Authorization approval rates have deteriorated due to issuer-side "
-                "risk tightening, resulting in elevated decline volumes across the network."
+                "The anomaly is likely driven by elevated transaction decline rates, "
+                "potentially linked to stricter authorization rules or risk controls."
             )
-        return (
-            "Authorization behavior remains stable, with no material deviation "
-            "in issuer approval patterns."
-        )
 
-    if intent == "SETTLEMENT_ANALYSIS":
         if "delay" in c:
             return (
-                "Settlement delays are observed despite stable authorization volumes, "
-                "indicating bottlenecks in clearing or regional settlement windows."
+                "Operational settlement delays indicate bottlenecks in processing "
+                "pipelines or clearing schedules."
             )
+
         return (
-            "Settlement processing remains within expected thresholds with no "
-            "significant downstream latency detected."
+            "Transaction patterns show minor anomalies that may arise from "
+            "temporary operational fluctuations."
         )
 
+    # -----------------------------
+    # Performance analysis
+    # -----------------------------
     if intent == "PERFORMANCE_REPORT":
+
         return (
-            "Overall network performance reflects upstream authorization variability "
-            "cascading into downstream settlement efficiency and throughput."
+            "Financial system performance appears influenced by transaction "
+            "processing efficiency and anomaly signals across the dataset."
         )
 
+    # -----------------------------
+    # Optimization recommendation
+    # -----------------------------
     if intent == "OPTIMIZATION_RECOMMENDATION":
+
         return (
-            "Optimizing issuer retry logic and aligning regional settlement batching "
-            "windows can stabilize throughput and reduce processing latency."
+            "Improving portfolio sustainability exposure and refining "
+            "risk monitoring thresholds could stabilize financial and ESG metrics."
         )
 
-    # -------- GENERAL FALLBACK --------
+    # -----------------------------
+    # general fallback
+    # -----------------------------
     return (
-        "Payment network behavior indicates upstream authorization dynamics influencing "
-        "downstream settlement performance."
+        "Observed financial and sustainability signals suggest moderate "
+        "operational and ESG-related risk factors influencing system behavior."
     )

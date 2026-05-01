@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SustainAI Finance – Sustainability Analytics Platform</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --emerald: #0F766E;
+    --emerald-dark: #0A5651;
+    --emerald-light: #1A9E94;
+    --slate: #1E293B;
+    --slate-mid: #2D3F55;
+    --slate-light: #334155;
+    --teal: #14B8A6;
+    --lime: #84CC16;
+    --bg-start: #F8FAFC;
+    --bg-end: #E2E8F0;
+    --card-bg: rgba(255,255,255,0.92);
+    --glass: rgba(255,255,255,0.12);
+    --glass-border: rgba(255,255,255,0.2);
+    --text-primary: #0F172A;
+    --text-muted: #64748B;
+    --text-light: #94A3B8;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --success: #10B981;
+    --sidebar-w: 72px;
+    --sidebar-expanded: 240px;
+    --nav-h: 64px;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(15,118,110,0.10), 0 1.5px 6px rgba(30,41,59,0.08);
+    --shadow-lg: 0 8px 40px rgba(15,118,110,0.18), 0 2px 12px rgba(30,41,59,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 10px; }
+
+  /* ── NAVBAR ── */
+  .top-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--nav-h);
+    background: rgba(15, 118, 110, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px 0 16px;
+    animation: slideDown 0.6s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes slideDown { from { transform: translateY(-100%); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+  .nav-brand {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; color: #fff;
+  }
+  .brand-chip {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--teal), var(--lime));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--slate); position: relative; overflow: hidden;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.25);
+  }
+  .brand-chip::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3));
+    pointer-events: none;
+  }
+  .brand-name {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: #fff;
+    line-height: 1.2;
+  }
+  .brand-sub { font-size: 10px; font-weight: 400; opacity: 0.7; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-btn {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    color: rgba(255,255,255,0.85); border-radius: 10px; padding: 7px 16px;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: rgba(255,255,255,0.22); color: #fff; border-color: rgba(255,255,255,0.35);
+    transform: translateY(-1px);
+  }
+  .nav-btn.active { background: rgba(132,204,22,0.25); border-color: var(--lime); color: #fff; }
+
+  .nav-profile {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--lime), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--slate); font-size: 16px; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.4); transition: transform 0.2s;
+    margin-left: 8px;
+  }
+  .nav-profile:hover { transform: scale(1.08); }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; top: var(--nav-h); left: 0; bottom: 0; z-index: 900;
+    width: var(--sidebar-w); background: var(--slate);
+    transition: width 0.35s cubic-bezier(.22,1,.36,1);
+    overflow: hidden; display: flex; flex-direction: column;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    animation: slideLeft 0.6s cubic-bezier(.22,1,.36,1) 0.1s both;
+  }
+  @keyframes slideLeft { from { transform: translateX(-100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+  .sidebar:hover { width: var(--sidebar-expanded); }
+  .sidebar:hover .sidebar-label { opacity: 1; transform: translateX(0); }
+
+  .sidebar-top { padding: 16px 0 8px; flex: 1; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px; cursor: pointer; position: relative;
+    transition: all 0.2s; white-space: nowrap; color: var(--text-light);
+    text-decoration: none;
+  }
+  .sidebar-item:hover { background: rgba(20,184,166,0.12); color: var(--teal); }
+  .sidebar-item.active { background: linear-gradient(90deg, rgba(20,184,166,0.18), transparent); color: var(--teal); }
+  .sidebar-item.active::before {
+    content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px; background: var(--teal); border-radius: 0 4px 4px 0;
+  }
+  .sidebar-icon { font-size: 20px; flex-shrink: 0; width: 32px; text-align: center; }
+  .sidebar-label {
+    font-size: 13px; font-weight: 500; opacity: 0;
+    transform: translateX(-8px); transition: all 0.25s 0.05s;
+  }
+  .sidebar-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 16px; }
+  .sidebar-bottom { padding: 8px 0 16px; }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    margin-left: var(--sidebar-w); padding-top: calc(var(--nav-h) + 28px);
+    padding-right: 24px; padding-left: 24px; padding-bottom: 40px;
+    transition: margin-left 0.35s cubic-bezier(.22,1,.36,1);
+    min-height: 100vh;
+  }
+
+  /* ── PAGE SECTIONS ── */
+  .page-section { display: none; }
+  .page-section.active { display: block; animation: fadeInUp 0.5s ease both; }
+  @keyframes fadeInUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-size: 26px; font-weight: 700; color: var(--slate); letter-spacing: -0.5px; }
+  .page-subtitle { font-size: 13.5px; color: var(--text-muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{ opacity:1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 50%{ opacity:0.8; box-shadow: 0 0 0 6px rgba(16,185,129,0); } }
+
+  /* ── KPI CARDS ── */
+  .kpi-card {
+    background: var(--card-bg);
+    border-radius: var(--radius); padding: 22px;
+    box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.8);
+    transition: transform 0.25s, box-shadow 0.25s;
+    position: relative; overflow: hidden;
+    animation: fadeInUp 0.6s ease both;
+  }
+  .kpi-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .kpi-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--emerald), var(--teal));
+  }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 12px; }
+  .kpi-value { font-size: 36px; font-weight: 700; color: var(--slate); line-height: 1; letter-spacing: -1px; }
+  .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+  .kpi-trend { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 20px; margin-top: 10px; }
+  .kpi-trend.up { background: rgba(16,185,129,0.12); color: var(--success); }
+  .kpi-trend.down { background: rgba(239,68,68,0.10); color: var(--danger); }
+  .kpi-trend.warn { background: rgba(245,158,11,0.12); color: var(--warning); }
+
+  /* ── SCORE RING ── */
+  .score-ring-wrap { display: flex; align-items: center; gap: 16px; }
+  .score-ring-svg { flex-shrink: 0; }
+  .score-ring-track { fill: none; stroke: #E2E8F0; stroke-width: 8; }
+  .score-ring-fill {
+    fill: none; stroke: url(#ringGrad); stroke-width: 8; stroke-linecap: round;
+    stroke-dasharray: 251.3; stroke-dashoffset: 251.3;
+    transition: stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1) 0.5s;
+    transform: rotate(-90deg); transform-origin: 50% 50%;
+  }
+  .score-ring-text { font-size: 22px; font-weight: 700; fill: var(--slate); font-family: 'Space Grotesk', sans-serif; }
+  .score-ring-sub { font-size: 10px; fill: var(--text-muted); font-family: 'Space Grotesk', sans-serif; }
+
+  /* ── RISK BADGE ── */
+  .risk-level { font-size: 28px; font-weight: 700; }
+  .risk-bar { height: 6px; border-radius: 10px; background: linear-gradient(90deg, var(--success) 0%, var(--warning) 50%, var(--danger) 100%); margin: 12px 0 6px; position: relative; }
+  .risk-marker { width: 14px; height: 14px; border-radius: 50%; background: var(--slate); border: 2px solid #fff; position: absolute; top: -4px; transform: translateX(-50%); box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: left 1s cubic-bezier(.22,1,.36,1) 0.6s; }
+
+  /* ── ANOMALY LIST ── */
+  .anomaly-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F1F5F9; }
+  .anomaly-item:last-child { border-bottom: none; }
+  .anomaly-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .anomaly-text { font-size: 12.5px; color: var(--text-primary); flex: 1; }
+  .badge-sev { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-high { background: rgba(239,68,68,0.12); color: var(--danger); }
+  .badge-med { background: rgba(245,158,11,0.12); color: var(--warning); }
+  .badge-low { background: rgba(16,185,129,0.12); color: var(--success); }
+
+  /* ── METRIC GRID ── */
+  .metric-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-label { font-size: 13px; color: var(--text-muted); }
+  .metric-value { font-size: 15px; font-weight: 600; color: var(--slate); font-family: 'DM Mono', monospace; }
+
+  /* ── CHART CARDS ── */
+  .chart-card {
+    background: var(--card-bg); border-radius: var(--radius); padding: 22px;
+    box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.8);
+    transition: transform 0.25s, box-shadow 0.25s;
+    animation: fadeInUp 0.6s ease both;
+  }
+  .chart-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+  .chart-title { font-size: 14px; font-weight: 600; color: var(--slate); }
+  .chart-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+  .chart-badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; background: rgba(20,184,166,0.12); color: var(--teal); font-weight: 600; white-space: nowrap; }
+  .chart-canvas-wrap { position: relative; height: 180px; }
+
+  /* ── AI INSIGHTS PANEL ── */
+  .insights-panel {
+    background: var(--slate); border-radius: var(--radius); padding: 20px;
+    color: #fff; border: 1px solid rgba(255,255,255,0.08);
+    animation: fadeInUp 0.6s ease 0.3s both;
+    height: 100%;
+  }
+  .insights-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .insights-title i { color: var(--teal); }
+  .insights-sub { font-size: 11px; color: rgba(255,255,255,0.5); font-family: 'DM Mono', monospace; margin-bottom: 16px; }
+  .insight-card {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+    transition: all 0.2s; cursor: default;
+    animation: fadeInUp 0.5s ease both;
+  }
+  .insight-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(20,184,166,0.3); transform: translateX(3px); }
+  .insight-card:nth-child(1) { animation-delay: 0.4s; }
+  .insight-card:nth-child(2) { animation-delay: 0.5s; }
+  .insight-card:nth-child(3) { animation-delay: 0.6s; }
+  .insight-card:nth-child(4) { animation-delay: 0.7s; }
+  .insight-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .insight-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .insight-icon.danger { background: rgba(239,68,68,0.2); color: #F87171; }
+  .insight-icon.warning { background: rgba(245,158,11,0.2); color: #FCD34D; }
+  .insight-icon.info { background: rgba(20,184,166,0.2); color: var(--teal); }
+  .insight-icon.success { background: rgba(132,204,22,0.2); color: var(--lime); }
+  .insight-text { font-size: 12.5px; color: rgba(255,255,255,0.88); line-height: 1.4; flex: 1; }
+  .insight-time { font-size: 10px; color: rgba(255,255,255,0.35); font-family: 'DM Mono', monospace; margin-top: 4px; }
+  .insight-severity { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 2px 6px; border-radius: 6px; }
+  .sev-crit { background: rgba(239,68,68,0.25); color: #F87171; }
+  .sev-high { background: rgba(245,158,11,0.2); color: #FCD34D; }
+  .sev-med { background: rgba(20,184,166,0.2); color: var(--teal); }
+  .sev-low { background: rgba(132,204,22,0.2); color: var(--lime); }
+
+  /* ── UPLOAD SECTION ── */
+  .upload-zone {
+    border: 2px dashed #CBD5E1; border-radius: 16px;
+    padding: 48px 24px; text-align: center; cursor: pointer;
+    transition: all 0.3s; background: rgba(255,255,255,0.6); position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--teal); background: rgba(20,184,166,0.04);
+    transform: scale(1.01);
+  }
+  .upload-icon { font-size: 48px; color: var(--teal); margin-bottom: 14px; }
+  .upload-title { font-size: 17px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
+  .upload-desc { font-size: 13px; color: var(--text-muted); }
+  .upload-formats { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+  .fmt-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid #CBD5E1; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+
+  .upload-btn {
+    background: linear-gradient(135deg, var(--emerald), var(--teal)); color: #fff;
+    border: none; border-radius: 12px; padding: 13px 32px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.25s;
+    font-family: 'Space Grotesk', sans-serif; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,118,110,0.35); }
+  .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .file-preview {
+    background: rgba(255,255,255,0.8); border: 1px solid #E2E8F0; border-radius: 12px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+    display: none; margin-top: 12px;
+  }
+  .file-preview.show { display: flex; animation: fadeInUp 0.3s ease; }
+  .file-icon { font-size: 28px; color: var(--emerald); }
+  .file-name { font-size: 13.5px; font-weight: 600; color: var(--slate); }
+  .file-size { font-size: 11.5px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .file-remove { margin-left: auto; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: color 0.2s; }
+  .file-remove:hover { color: var(--danger); }
+
+  .upload-progress { height: 4px; border-radius: 10px; background: #E2E8F0; margin-top: 8px; overflow: hidden; display: none; }
+  .upload-progress.show { display: block; }
+  .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--emerald), var(--teal)); border-radius: 10px; transition: width 0.4s ease; }
+
+  /* ── RISK ANALYSIS ── */
+  .risk-table { width: 100%; }
+  .risk-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 10px 12px; background: #F8FAFC; border-bottom: 2px solid #E2E8F0; }
+  .risk-table td { font-size: 13px; padding: 12px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+  .risk-table tr:hover td { background: rgba(20,184,166,0.04); }
+  .risk-bar-mini { height: 6px; border-radius: 10px; background: #E2E8F0; overflow: hidden; min-width: 80px; }
+  .risk-fill { height: 100%; border-radius: 10px; }
+
+  /* ── SCORE PAGE ── */
+  .score-gauge-wrap { position: relative; display: flex; justify-content: center; align-items: center; height: 220px; }
+  .score-gauge-text { position: absolute; text-align: center; }
+  .score-gauge-num { font-size: 52px; font-weight: 700; color: var(--slate); line-height: 1; }
+  .score-gauge-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  .pillar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .pillar-label { font-size: 13px; font-weight: 500; color: var(--slate); width: 130px; flex-shrink: 0; }
+  .pillar-bar { flex: 1; height: 8px; border-radius: 10px; background: #E2E8F0; overflow: hidden; }
+  .pillar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--emerald), var(--teal)); transition: width 1.2s cubic-bezier(.22,1,.36,1) 0.8s; }
+  .pillar-value { font-size: 13px; font-weight: 600; color: var(--slate); font-family: 'DM Mono', monospace; width: 40px; text-align: right; }
+
+  /* ── AI RECS ── */
+  .rec-card {
+    background: var(--card-bg); border-radius: 14px; padding: 18px;
+    border: 1px solid rgba(255,255,255,0.8); box-shadow: var(--shadow);
+    transition: all 0.25s; margin-bottom: 14px;
+    animation: fadeInUp 0.5s ease both;
+  }
+  .rec-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(20,184,166,0.3); }
+  .rec-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .rec-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .rec-title { font-size: 14.5px; font-weight: 600; color: var(--slate); }
+  .rec-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .rec-body { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+  .rec-impact { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 11.5px; color: var(--text-muted); }
+  .rec-impact strong { color: var(--emerald); }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider { height: 1px; background: linear-gradient(90deg, transparent, #CBD5E1, transparent); margin: 28px 0; }
+
+  /* ── MOBILE ── */
+  .hamburger {
+    display: none; background: var(--glass); border: 1px solid var(--glass-border);
+    color: #fff; border-radius: 8px; padding: 7px 9px; font-size: 18px;
+    cursor: pointer; margin-right: 10px;
+  }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 850; }
+
+  @media (max-width: 992px) {
+    .nav-links .nav-btn:not(.nav-btn-always) { display: none; }
+  }
+  @media (max-width: 768px) {
+    .hamburger { display: flex; align-items: center; }
+    .sidebar { transform: translateX(-100%); width: var(--sidebar-expanded); transition: transform 0.3s ease, width 0s; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar:hover { width: var(--sidebar-expanded); }
+    .sidebar:hover .sidebar-label { opacity: 1; transform: translateX(0); }
+    .sidebar-label { opacity: 1 !important; transform: translateX(0) !important; }
+    .sidebar-overlay.show { display: block; }
+    .main-content { margin-left: 0; padding: calc(var(--nav-h) + 20px) 14px 40px; }
+    .kpi-value { font-size: 28px; }
+    .chart-canvas-wrap { height: 150px; }
+  }
+
+  /* ── LOADING SHIMMER ── */
+  .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e8e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+  @keyframes shimmer { 0%{ background-position: 200% 0; } 100%{ background-position: -200% 0; } }
+
+  /* ── REPORT CARDS ── */
+  .report-card { background: var(--card-bg); border-radius: 14px; padding: 18px 20px; border: 1px solid #E2E8F0; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; transition: all 0.2s; cursor: pointer; }
+  .report-card:hover { border-color: var(--teal); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .report-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .report-name { font-size: 14px; font-weight: 600; color: var(--slate); }
+  .report-date { font-size: 11.5px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .report-actions { margin-left: auto; display: flex; gap: 6px; }
+  .report-btn-sm { background: transparent; border: 1px solid #E2E8F0; color: var(--text-muted); border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', sans-serif; }
+  .report-btn-sm:hover { border-color: var(--teal); color: var(--teal); background: rgba(20,184,166,0.06); }
+
+  /* ── GENERAL ── */
+  .btn-primary-custom {
+    background: linear-gradient(135deg, var(--emerald), var(--teal)); color: #fff;
+    border: none; border-radius: 10px; padding: 9px 20px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.25s;
+    font-family: 'Space Grotesk', sans-serif; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .btn-primary-custom:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(15,118,110,0.3); }
+  .btn-ghost { background: transparent; border: 1px solid #CBD5E1; color: var(--text-muted); border-radius: 10px; padding: 8px 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', sans-serif; }
+  .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; display: inline-block; }
+  .tag-emerald { background: rgba(15,118,110,0.1); color: var(--emerald); }
+  .tag-teal { background: rgba(20,184,166,0.1); color: var(--teal); }
+  .tag-lime { background: rgba(132,204,22,0.12); color: #65A30D; }
+  .tag-warn { background: rgba(245,158,11,0.1); color: var(--warning); }
+  .tag-danger { background: rgba(239,68,68,0.1); color: var(--danger); }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--slate); }
+  .section-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* Notification badge */
+  .notif-badge { background: var(--danger); color: #fff; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-left: -8px; margin-top: -8px; border: 2px solid rgba(15,118,110,0.5); }
+
+  /* Ticker row */
+  .ticker-bar {
+    background: var(--slate); border-radius: 10px; padding: 8px 16px;
+    display: flex; gap: 24px; overflow: hidden; margin-bottom: 24px;
+    border: 1px solid rgba(255,255,255,0.06); animation: fadeInUp 0.5s ease 0.35s both;
+  }
+  .ticker-item { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 12px; font-family: 'DM Mono', monospace; }
+  .ticker-sym { color: var(--teal); font-weight: 600; }
+  .ticker-val { color: #fff; }
+  .ticker-chg.up { color: var(--lime); }
+  .ticker-chg.dn { color: #F87171; }
+  .ticker-sep { color: rgba(255,255,255,0.15); }
+</style>
+</head>
+<body>
+
+<!-- SVG DEFS -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="50%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- NAVBAR -->
+<nav class="top-nav">
+  <div class="d-flex align-items-center gap-2">
+    <button class="hamburger" id="hamburgerBtn"><i class="bi bi-list"></i></button>
+    <a class="nav-brand" href="#">
+      <div class="brand-chip"><i class="bi bi-cpu-fill"></i></div>
+      <div>
+        <div class="brand-name">SustainAI Finance</div>
+        <div class="brand-sub">Sustainability Intelligence Platform</div>
+      </div>
+    </a>
+  </div>
+  <div class="nav-links">
+    <a class="nav-btn active nav-btn-always" onclick="showSection('dashboard')"><i class="bi bi-grid-fill"></i> Dashboard</a>
+    <a class="nav-btn" onclick="showSection('reports')"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
+    <a class="nav-btn" onclick="showSection('aiinsights')"><i class="bi bi-stars"></i> AI Insights</a>
+    <a class="nav-btn" onclick="showSection('simulation')"><i class="bi bi-lightning-charge"></i> Simulation</a>
+    <div style="position:relative">
+      <div class="nav-profile"><i class="bi bi-person-fill"></i></div>
+      <div class="notif-badge" style="position:absolute;top:0;right:0">3</div>
+    </div>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <a class="sidebar-item active" onclick="showSection('dashboard')">
+      <i class="bi bi-grid-1x2-fill sidebar-icon"></i>
+      <span class="sidebar-label">Overview</span>
+    </a>
+    <a class="sidebar-item" onclick="showSection('upload')">
+      <i class="bi bi-cloud-arrow-up-fill sidebar-icon"></i>
+      <span class="sidebar-label">Upload Report</span>
+    </a>
+    <a class="sidebar-item" onclick="showSection('riskanalysis')">
+      <i class="bi bi-shield-exclamation sidebar-icon"></i>
+      <span class="sidebar-label">Risk Analysis</span>
+    </a>
+    <div class="sidebar-divider"></div>
+    <a class="sidebar-item" onclick="showSection('score')">
+      <i class="bi bi-award-fill sidebar-icon"></i>
+      <span class="sidebar-label">Sustainability Score</span>
+    </a>
+    <a class="sidebar-item" onclick="showSection('aiinsights')">
+      <i class="bi bi-stars sidebar-icon"></i>
+      <span class="sidebar-label">AI Recommendations</span>
+    </a>
+    <div class="sidebar-divider"></div>
+    <a class="sidebar-item" onclick="showSection('reports')">
+      <i class="bi bi-folder2-open sidebar-icon"></i>
+      <span class="sidebar-label">Reports</span>
+    </a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="sidebar-divider"></div>
+    <a class="sidebar-item">
+      <i class="bi bi-gear-fill sidebar-icon" style="color:var(--text-light)"></i>
+      <span class="sidebar-label">Settings</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content" id="mainContent">
+
+  <!-- ████ DASHBOARD ████ -->
+  <section class="page-section active" id="sec-dashboard">
+    <div class="page-header d-flex align-items-start justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="page-title">Sustainability Analytics Dashboard</div>
+        <div class="page-subtitle"><span class="status-dot"></span>Live · Last updated 2 min ago · Q4 2024 Financial Period</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn-ghost"><i class="bi bi-download me-1"></i>Export</button>
+        <button class="btn-primary-custom"><i class="bi bi-arrow-clockwise"></i> Refresh Data</button>
+      </div>
+    </div>
+
+    <!-- TICKER -->
+    <div class="ticker-bar">
+      <div class="ticker-item"><span class="ticker-sym">SUSTAIN-IDX</span><span class="ticker-val">842.3</span><span class="ticker-chg up">+2.4%</span></div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item"><span class="ticker-sym">ESG-SCORE</span><span class="ticker-val">74.2</span><span class="ticker-chg up">+1.2%</span></div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item"><span class="ticker-sym">CARBON-EXP</span><span class="ticker-val">1.23T</span><span class="ticker-chg dn">-3.1%</span></div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item"><span class="ticker-sym">RISK-ALPHA</span><span class="ticker-val">0.67</span><span class="ticker-chg up">+0.05</span></div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item"><span class="ticker-sym">GREEN-BOND</span><span class="ticker-val">$4.8B</span><span class="ticker-chg up">+8.2%</span></div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="row g-3 mb-4">
+      <!-- Card 1: Sustainability Score -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card h-100">
+  <div class="kpi-label"><i class="bi bi-award me-1"></i>Sustainability Risk Score</div>
+          <div class="score-ring-wrap">
+            <svg class="score-ring-svg" width="90" height="90" viewBox="0 0 90 90">
+              <circle class="score-ring-track" cx="45" cy="45" r="38"/>
+              <circle class="score-ring-fill" id="ringFill" cx="45" cy="45" r="38"/>
+              <text class="score-ring-text" x="45" y="49" text-anchor="middle" dominant-baseline="middle">74</text>
+            </svg>
+            <div>
+              <div style="font-size:26px;font-weight:700;color:var(--slate)">
+              <span id="scoreMain">74</span>
+              <small>/100</small>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted)">ESG Composite Index</div>
+              <div class="kpi-trend up"><i class="bi bi-arrow-up-short"></i>+4.2 pts this quarter</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Financial Risk -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card h-100">
+          <div class="kpi-label"><i class="bi bi-shield-exclamation me-1"></i>Financial Risk Indicator</div>
+          <div class="risk-level" style="color:var(--warning)">MEDIUM</div>
+          <div class="kpi-sub">Composite risk across 6 vectors</div>
+          <div class="risk-bar">
+            <div class="risk-marker" id="riskMarker" style="left:42%"></div>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size:10px;color:var(--text-muted)"><span>Low</span><span>Medium</span><span>High</span></div>
+          <div class="kpi-trend warn" style="margin-top:10px"><i class="bi bi-exclamation-triangle me-1"></i>+12% vs last period</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Anomaly Alerts -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card h-100" id="anomalyCard">
+          <div class="kpi-label d-flex align-items-center justify-content-between"><span><i class="bi bi-exclamation-octagon me-1"></i>Anomaly Alerts</span><span class="tag tag-danger">7 Active</span></div>
+          <div class="anomaly-item">
+            <div class="anomaly-dot" style="background:var(--danger)"></div>
+            <div class="anomaly-text">Spike in decline rate · Energy</div>
+            <span class="badge-sev badge-high">HIGH</span>
+          </div>
+          <div class="anomaly-item">
+            <div class="anomaly-dot" style="background:var(--warning)"></div>
+            <div class="anomaly-text">Settlement delay · APAC region</div>
+            <span class="badge-sev badge-med">MED</span>
+          </div>
+          <div class="anomaly-item">
+            <div class="anomaly-dot" style="background:var(--success)"></div>
+            <div class="anomaly-text">Carbon exposure threshold met</div>
+            <span class="badge-sev badge-low">LOW</span>
+          </div>
+          <div class="anomaly-item">
+            <div class="anomaly-dot" style="background:var(--warning)"></div>
+            <div class="anomaly-text">Unusual vol. in green bonds</div>
+            <span class="badge-sev badge-med">MED</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Transaction Metrics -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-card h-100">
+          <div class="kpi-label"><i class="bi bi-activity me-1"></i>Transaction Metrics</div>
+          <div class="kpi-value" style="font-size:32px">48,291</div>
+          <div class="kpi-sub">Total transactions · This period</div>
+          <div class="section-divider" style="margin:10px 0"></div>
+          <div class="metric-row">
+            <span class="metric-label">Approval Rate</span>
+            <span class="metric-value" style="color:var(--success)">94.7%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Decline Rate</span>
+            <span class="metric-value" style="color:var(--danger)">5.3%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Avg Settlement</span>
+            <span class="metric-value">2.4 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW + AI PANEL -->
+    <div class="row g-3 mb-4">
+      <!-- Charts 3-col -->
+      <div class="col-12 col-xl-8">
+        <div class="row g-3">
+          <!-- Chart 1 -->
+          <div class="col-12 col-md-6" style="animation-delay:0.25s">
+            <div class="chart-card h-100">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">Decline Rate Trend</div>
+                  <div class="chart-desc">Monthly · Last 12 months</div>
+                </div>
+                <span class="chart-badge"><i class="bi bi-arrow-down-short"></i>5.3% avg</span>
+              </div>
+              <div class="chart-canvas-wrap"><canvas id="chartDecline"></canvas></div>
+            </div>
+          </div>
+          <!-- Chart 2 -->
+          <div class="col-12 col-md-6" style="animation-delay:0.3s">
+            <div class="chart-card h-100">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">Settlement Delay Distribution</div>
+                  <div class="chart-desc">By day bucket · Current period</div>
+                </div>
+                <span class="chart-badge">2.4d avg</span>
+              </div>
+              <div class="chart-canvas-wrap"><canvas id="chartSettlement"></canvas></div>
+            </div>
+          </div>
+          <!-- Chart 3 -->
+          <div class="col-12" style="animation-delay:0.35s">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">Transaction Volume Trend</div>
+                  <div class="chart-desc">Daily volume · Last 30 days · Sustainable vs Non-Sustainable</div>
+                </div>
+                <span class="chart-badge"><i class="bi bi-graph-up-arrow me-1"></i>+18.4% YoY</span>
+              </div>
+              <div class="chart-canvas-wrap" style="height:160px"><canvas id="chartVolume"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      <div class="col-12 col-xl-4">
+        <div class="insights-panel">
+          <div class="insights-title"><i class="bi bi-stars"></i> AI-Generated Insights</div>
+          <div class="insights-sub">MODEL: sustainai-v3 · CONF: 96.2%</div>
+
+          <div class="insight-card">
+            <div class="insight-header">
+              <div class="insight-icon danger"><i class="bi bi-graph-up-arrow"></i></div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <span class="insight-severity sev-crit">CRITICAL</span>
+                  <span class="insight-time">2 min ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="insight-text">Unusual spike detected in transaction decline rate — 23% above baseline across energy sector portfolios.</div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-header">
+              <div class="insight-icon warning"><i class="bi bi-tree-fill"></i></div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <span class="insight-severity sev-high">HIGH</span>
+                  <span class="insight-time">18 min ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="insight-text">High sustainability exposure identified in energy sector — exceeds recommended ESG threshold by 34%.</div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-header">
+              <div class="insight-icon info"><i class="bi bi-shield-check"></i></div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <span class="insight-severity sev-med">MEDIUM</span>
+                  <span class="insight-time">1h ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="insight-text">Risk score increased by 12% compared to previous period — driven by APAC market volatility.</div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-header">
+              <div class="insight-icon success"><i class="bi bi-check-circle-fill"></i></div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <span class="insight-severity sev-low">LOW</span>
+                  <span class="insight-time">3h ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="insight-text">Green bond portfolio outperforming benchmark by 3.2 bps — sustainability-linked instruments showing positive momentum.</div>
+          </div>
+
+          <button class="btn-primary-custom w-100 mt-2" style="justify-content:center">
+            <i class="bi bi-stars"></i> Generate Full AI Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ UPLOAD ████ -->
+  <section class="page-section" id="sec-upload">
+    <div class="page-header">
+      <div class="page-title">Upload Financial Report</div>
+      <div class="page-subtitle">Import CSV, Excel, or JSON financial data for AI-powered sustainability analysis</div>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-lg-7">
+        <div class="kpi-card" style="padding:28px">
+          <div class="section-header mb-3">
+            <div class="section-title"><i class="bi bi-cloud-arrow-up text-success me-2"></i>Import Financial Data</div>
+            <span class="tag tag-teal">Encrypted Upload</span>
+          </div>
+
+          <input type="file" id="fileInput" accept=".csv,.xlsx,.json,.xml" style="display:none">
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+            <div class="upload-title">Drop your financial report here</div>
+            <div class="upload-desc">or click to browse files from your system</div>
+            <div class="upload-formats mt-3">
+              <span class="fmt-badge">CSV</span>
+              <span class="fmt-badge">XLSX</span>
+              <span class="fmt-badge">JSON</span>
+              <span class="fmt-badge">XML</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-light);margin-top:10px">Max file size: 50MB · AES-256 encrypted in transit</div>
+          </div>
+
+          <div class="file-preview" id="filePreview">
+            <i class="bi bi-file-earmark-spreadsheet file-icon"></i>
+            <div>
+              <div class="file-name" id="fileName">–</div>
+              <div class="file-size" id="fileSize">–</div>
+            </div>
+            <i class="bi bi-x-circle-fill file-remove" id="fileRemove"></i>
+          </div>
+
+          <div class="upload-progress" id="uploadProgress"><div class="progress-fill" id="progressFill"></div></div>
+
+          <div class="d-flex gap-3 mt-4 flex-wrap">
+<button class="upload-btn" id="uploadBtn" onclick="uploadFile()" disabled>
+  <i class="bi bi-cpu-fill"></i> Analyze with AI
+</button>
+            <button class="btn-ghost" onclick="resetUpload()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-5">
+        <div class="kpi-card h-100" style="padding:24px">
+          <div class="section-title mb-3"><i class="bi bi-info-circle text-primary me-2"></i>What We Analyze</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(15,118,110,0.1);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-size:16px;flex-shrink:0"><i class="bi bi-graph-up"></i></div>
+              <div><div style="font-size:13.5px;font-weight:600;color:var(--slate)">Transaction Pattern Analysis</div><div style="font-size:12px;color:var(--text-muted)">Detect anomalies and classify risk in financial flows</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(20,184,166,0.1);display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:16px;flex-shrink:0"><i class="bi bi-tree"></i></div>
+              <div><div style="font-size:13.5px;font-weight:600;color:var(--slate)">ESG Scoring & Classification</div><div style="font-size:12px;color:var(--text-muted)">Map transactions against sustainability frameworks (TCFD, GRI)</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(132,204,22,0.12);display:flex;align-items:center;justify-content:center;color:#65A30D;font-size:16px;flex-shrink:0"><i class="bi bi-shield-check"></i></div>
+              <div><div style="font-size:13.5px;font-weight:600;color:var(--slate)">Risk Exposure Mapping</div><div style="font-size:12px;color:var(--text-muted)">Quantify climate & regulatory risk exposure per sector</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;color:var(--warning);font-size:16px;flex-shrink:0"><i class="bi bi-stars"></i></div>
+              <div><div style="font-size:13.5px;font-weight:600;color:var(--slate)">AI Recommendation Engine</div><div style="font-size:12px;color:var(--text-muted)">Generate actionable insights from your portfolio data</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ RISK ANALYSIS ████ -->
+  <section class="page-section" id="sec-riskanalysis">
+    <div class="page-header">
+      <div class="page-title">Risk Analysis</div>
+      <div class="page-subtitle">Multi-dimensional financial and sustainability risk breakdown by sector</div>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="kpi-card" style="border-top:3px solid var(--danger)">
+          <div class="kpi-label">Credit Risk</div>
+          <div class="kpi-value" style="color:var(--danger)">HIGH</div>
+          <div class="kpi-trend down"><i class="bi bi-arrow-up me-1"></i>+18% MoM</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="kpi-card" style="border-top:3px solid var(--warning)">
+          <div class="kpi-label">Market Risk</div>
+          <div class="kpi-value" style="color:var(--warning)">MED</div>
+          <div class="kpi-trend warn"><i class="bi bi-dash me-1"></i>Stable</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="kpi-card" style="border-top:3px solid var(--success)">
+          <div class="kpi-label">Liquidity Risk</div>
+          <div class="kpi-value" style="color:var(--success)">LOW</div>
+          <div class="kpi-trend up"><i class="bi bi-arrow-down me-1"></i>-6% MoM</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="kpi-card" style="border-top:3px solid var(--teal)">
+          <div class="kpi-label">Climate Risk</div>
+          <div class="kpi-value" style="color:var(--teal)">MED</div>
+          <div class="kpi-trend warn"><i class="bi bi-arrow-up me-1"></i>+9% MoM</div>
+        </div>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Risk Exposure by Sector</div><div class="chart-desc">Normalized score 0–100 · Current vs. Previous period</div></div>
+            <span class="chart-badge">6 Sectors</span>
+          </div>
+          <div style="position:relative;height:280px"><canvas id="chartRisk"></canvas></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="kpi-card h-100">
+          <div class="section-title mb-3">Sector Risk Breakdown</div>
+          <table class="risk-table w-100">
+            <thead><tr><th>Sector</th><th>Score</th><th>Exposure</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-danger">Energy</span></td><td><span class="metric-value">82</span></td><td><div class="risk-bar-mini"><div class="risk-fill" style="width:82%;background:var(--danger)"></div></div></td></tr>
+              <tr><td><span class="tag tag-warn">Real Estate</span></td><td><span class="metric-value">61</span></td><td><div class="risk-bar-mini"><div class="risk-fill" style="width:61%;background:var(--warning)"></div></div></td></tr>
+              <tr><td><span class="tag tag-warn">Industrials</span></td><td><span class="metric-value">57</span></td><td><div class="risk-bar-mini"><div class="risk-fill" style="width:57%;background:var(--warning)"></div></div></td></tr>
+              <tr><td><span class="tag tag-teal">Finance</span></td><td><span class="metric-value">43</span></td><td><div class="risk-bar-mini"><div class="risk-fill" style="width:43%;background:var(--teal)"></div></div></td></tr>
+              <tr><td><span class="tag tag-emerald">Tech</span></td><td><span class="metric-value">28</span></td><td><div class="risk-bar-mini"><div class="risk-fill" style="width:28%;background:var(--emerald)"></div></div></td></tr>
+              <tr><td><span class="tag tag-lime">Green Bonds</span></td><td><span class="metric-value">14</span></td><td><div class="risk-bar-mini"><div class="risk-fill" style="width:14%;background:var(--lime)"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ SCORE ████ -->
+  <section class="page-section" id="sec-score">
+    <div class="page-header">
+      <div class="page-title">Sustainability Score</div>
+      <div class="page-subtitle">ESG composite index with pillar-level breakdown and trajectory</div>
+    </div>
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="kpi-card text-center" style="padding:30px">
+          <div class="kpi-label mb-2">Overall Sustainability Score</div>
+          <div class="score-gauge-wrap">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#E2E8F0" stroke-width="14"/>
+              <circle cx="100" cy="100" r="80" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"
+                stroke-dasharray="502.6" id="gaugeCircle"
+                stroke-dashoffset="502.6"
+                transform="rotate(-90 100 100)"
+                style="transition:stroke-dashoffset 1.8s cubic-bezier(.22,1,.36,1) 0.4s"/>
+            </svg>
+            <div class="score-gauge-text">
+              <div class="score-gauge-num" id="gaugeNum">0</div>
+              <div class="score-gauge-label">/ 100</div>
+              <div class="tag tag-teal mt-2">GOOD</div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <div class="kpi-trend up d-inline-flex"><i class="bi bi-arrow-up-short"></i>+4.2 pts this quarter</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-8">
+        <div class="kpi-card h-100" style="padding:28px">
+          <div class="section-title mb-4">ESG Pillar Breakdown</div>
+          <div class="pillar-row">
+            <div class="pillar-label"><i class="bi bi-tree-fill text-success me-2"></i>Environmental</div>
+            <div class="pillar-bar"><div class="pillar-fill" id="pillarE" style="width:0%"></div></div>
+            <div class="pillar-value">79</div>
+          </div>
+          <div class="pillar-row">
+            <div class="pillar-label"><i class="bi bi-people-fill text-primary me-2"></i>Social</div>
+            <div class="pillar-bar"><div class="pillar-fill" id="pillarS" style="width:0%"></div></div>
+            <div class="pillar-value">71</div>
+          </div>
+          <div class="pillar-row">
+            <div class="pillar-label"><i class="bi bi-building-fill me-2" style="color:var(--slate)"></i>Governance</div>
+            <div class="pillar-bar"><div class="pillar-fill" id="pillarG" style="width:0%"></div></div>
+            <div class="pillar-value">68</div>
+          </div>
+          <div class="pillar-row">
+            <div class="pillar-label"><i class="bi bi-cloud-sun-fill text-warning me-2"></i>Climate Risk</div>
+            <div class="pillar-bar"><div class="pillar-fill" id="pillarC" style="width:0%"></div></div>
+            <div class="pillar-value">62</div>
+          </div>
+          <div class="pillar-row">
+            <div class="pillar-label"><i class="bi bi-lightning-fill text-info me-2"></i>Innovation</div>
+            <div class="pillar-bar"><div class="pillar-fill" id="pillarI" style="width:0%"></div></div>
+            <div class="pillar-value">85</div>
+          </div>
+          <div class="section-divider"></div>
+          <div class="row g-3 text-center mt-1">
+            <div class="col-4"><div style="font-size:22px;font-weight:700;color:var(--emerald)">A-</div><div style="font-size:11px;color:var(--text-muted)">MSCI Rating</div></div>
+            <div class="col-4"><div style="font-size:22px;font-weight:700;color:var(--teal)">Top 22%</div><div style="font-size:11px;color:var(--text-muted)">Peer Ranking</div></div>
+            <div class="col-4"><div style="font-size:22px;font-weight:700;color:var(--lime)">+4.2</div><div style="font-size:11px;color:var(--text-muted)">QoQ Change</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ AI INSIGHTS ████ -->
+  <section class="page-section" id="sec-aiinsights">
+    <div class="page-header d-flex align-items-start justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="page-title">AI Recommendations</div>
+        <div class="page-subtitle"><span class="status-dot"></span>SustainAI Model v3.1 · Inference complete · 24 recommendations generated</div>
+      </div>
+      <button class="btn-primary-custom"><i class="bi bi-stars"></i> Re-run AI Analysis</button>
+    </div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-icon" style="background:rgba(239,68,68,0.12)"><i class="bi bi-exclamation-triangle-fill" style="color:var(--danger)"></i></div>
+            <div style="flex:1"><div class="rec-title">Reduce Energy Sector Exposure</div></div>
+            <span class="tag tag-danger">CRITICAL</span>
+          </div>
+          <div class="rec-body">Your portfolio has 34% overweight in high-carbon energy assets versus ESG benchmarks. Rebalancing by reducing direct fossil fuel exposure by 15–20% would improve your sustainability score by an estimated 8 points and reduce climate regulatory risk.</div>
+          <div class="rec-impact"><i class="bi bi-graph-up-arrow"></i> Projected impact: <strong>+8 ESG pts</strong> &nbsp;·&nbsp; <i class="bi bi-shield-check"></i> <strong>-22% climate risk</strong> &nbsp;·&nbsp; Timeline: Q1 2025</div>
+        </div>
+        <div class="rec-card" style="animation-delay:0.1s">
+          <div class="rec-header">
+            <div class="rec-icon" style="background:rgba(20,184,166,0.12)"><i class="bi bi-currency-dollar" style="color:var(--teal)"></i></div>
+            <div style="flex:1"><div class="rec-title">Increase Green Bond Allocation</div></div>
+            <span class="tag tag-teal">RECOMMENDED</span>
+          </div>
+          <div class="rec-body">Green bond market is showing positive momentum with a +8.2% YTD growth. Increasing allocation from current 12% to 20% aligns with SFDR Article 9 compliance and provides hedging benefits against carbon taxation risk.</div>
+          <div class="rec-impact"><i class="bi bi-graph-up-arrow"></i> Projected impact: <strong>+5 ESG pts</strong> &nbsp;·&nbsp; <i class="bi bi-percent"></i> <strong>+1.2% expected alpha</strong></div>
+        </div>
+        <div class="rec-card" style="animation-delay:0.2s">
+          <div class="rec-header">
+            <div class="rec-icon" style="background:rgba(132,204,22,0.12)"><i class="bi bi-cpu-fill" style="color:var(--lime)"></i></div>
+            <div style="flex:1"><div class="rec-title">Implement AI-Driven Settlement Monitoring</div></div>
+            <span class="tag tag-lime">OPTIMIZE</span>
+          </div>
+          <div class="rec-body">Settlement delays in APAC region are averaging 3.8 days vs. the 2.4 day global benchmark. Deploying real-time AI settlement monitoring could reduce delays by 40% and improve transaction approval rates by an estimated 2.3 percentage points.</div>
+          <div class="rec-impact"><i class="bi bi-clock"></i> Projected impact: <strong>-1.4d settlement time</strong> &nbsp;·&nbsp; <i class="bi bi-check-circle"></i> <strong>+2.3% approval rate</strong></div>
+        </div>
+        <div class="rec-card" style="animation-delay:0.3s">
+          <div class="rec-header">
+            <div class="rec-icon" style="background:rgba(245,158,11,0.12)"><i class="bi bi-file-earmark-check-fill" style="color:var(--warning)"></i></div>
+            <div style="flex:1"><div class="rec-title">TCFD Disclosure Readiness</div></div>
+            <span class="tag tag-warn">COMPLIANCE</span>
+          </div>
+          <div class="rec-body">Upcoming mandatory TCFD disclosures require scenario analysis across 3 climate pathways. Current data gaps in Scope 3 emissions reporting could expose the portfolio to regulatory risk. Immediate data collection initiative recommended.</div>
+          <div class="rec-impact"><i class="bi bi-shield-fill-check"></i> Projected impact: <strong>Full TCFD compliance</strong> &nbsp;·&nbsp; Deadline: <strong>March 2025</strong></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="insights-panel">
+          <div class="insights-title"><i class="bi bi-bar-chart-fill"></i> Recommendation Stats</div>
+          <div class="insights-sub">AI MODEL CONFIDENCE: 96.2%</div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:rgba(255,255,255,0.6)">Critical</span><span style="font-size:12px;color:#F87171;font-family:'DM Mono',monospace">4</span></div>
+            <div style="height:5px;border-radius:10px;background:rgba(255,255,255,0.1)"><div style="height:100%;width:17%;border-radius:10px;background:var(--danger)"></div></div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:rgba(255,255,255,0.6)">High Priority</span><span style="font-size:12px;color:#FCD34D;font-family:'DM Mono',monospace">8</span></div>
+            <div style="height:5px;border-radius:10px;background:rgba(255,255,255,0.1)"><div style="height:100%;width:33%;border-radius:10px;background:var(--warning)"></div></div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:rgba(255,255,255,0.6)">Recommended</span><span style="font-size:12px;color:var(--teal);font-family:'DM Mono',monospace">9</span></div>
+            <div style="height:5px;border-radius:10px;background:rgba(255,255,255,0.1)"><div style="height:100%;width:37%;border-radius:10px;background:var(--teal)"></div></div>
+          </div>
+          <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:rgba(255,255,255,0.6)">Optimize</span><span style="font-size:12px;color:var(--lime);font-family:'DM Mono',monospace">3</span></div>
+            <div style="height:5px;border-radius:10px;background:rgba(255,255,255,0.1)"><div style="height:100%;width:13%;border-radius:10px;background:var(--lime)"></div></div>
+          </div>
+          <div class="section-divider" style="border-color:rgba(255,255,255,0.08);margin:12px 0"></div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px">EXPECTED IMPACT IF ALL IMPLEMENTED</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,0.7)">ESG Score</span><span style="color:var(--lime);font-weight:600;font-size:13px">+18 pts → 92/100</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,0.7)">Risk Reduction</span><span style="color:var(--teal);font-weight:600;font-size:13px">-34% exposure</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,0.7)">Alpha Generation</span><span style="color:#FCD34D;font-weight:600;font-size:13px">+2.8% projected</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ REPORTS ████ -->
+  <section class="page-section" id="sec-reports">
+    <div class="page-header d-flex align-items-start justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="page-title">Financial Reports</div>
+        <div class="page-subtitle">Uploaded and AI-generated sustainability reports archive</div>
+      </div>
+      <button class="btn-primary-custom" onclick="showSection('upload')"><i class="bi bi-cloud-arrow-up"></i> Upload New</button>
+    </div>
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="kpi-card" style="padding:24px">
+          <div class="section-header mb-3">
+            <div class="section-title">Recent Reports</div>
+            <input type="text" placeholder="Search reports…" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:7px 14px;font-size:13px;color:var(--slate);outline:none;font-family:'Space Grotesk',sans-serif">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="report-card">
+              <div class="report-icon" style="background:rgba(15,118,110,0.1);color:var(--emerald)"><i class="bi bi-file-earmark-bar-graph"></i></div>
+              <div>
+                <div class="report-name">Q4 2024 Sustainability Report</div>
+                <div class="report-date">Generated · 2025-01-05 · 4.2MB</div>
+              </div>
+              <span class="tag tag-emerald ms-2">AI Generated</span>
+              <div class="report-actions">
+                <button class="report-btn-sm"><i class="bi bi-eye me-1"></i>View</button>
+                <button class="report-btn-sm"><i class="bi bi-download me-1"></i>Export</button>
+              </div>
+            </div>
+            <div class="report-card">
+              <div class="report-icon" style="background:rgba(20,184,166,0.1);color:var(--teal)"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+              <div>
+                <div class="report-name">ESG Risk Exposure Matrix – Dec 2024</div>
+                <div class="report-date">Uploaded · 2024-12-28 · 1.8MB · CSV</div>
+              </div>
+              <span class="tag tag-teal ms-2">Processed</span>
+              <div class="report-actions">
+                <button class="report-btn-sm"><i class="bi bi-eye me-1"></i>View</button>
+                <button class="report-btn-sm"><i class="bi bi-download me-1"></i>Export</button>
+              </div>
+            </div>
+            <div class="report-card">
+              <div class="report-icon" style="background:rgba(132,204,22,0.1);color:#65A30D"><i class="bi bi-file-earmark-check"></i></div>
+              <div>
+                <div class="report-name">TCFD Scenario Analysis – Q3 2024</div>
+                <div class="report-date">Generated · 2024-10-12 · 6.7MB</div>
+              </div>
+              <span class="tag tag-lime ms-2">TCFD</span>
+              <div class="report-actions">
+                <button class="report-btn-sm"><i class="bi bi-eye me-1"></i>View</button>
+                <button class="report-btn-sm"><i class="bi bi-download me-1"></i>Export</button>
+              </div>
+            </div>
+            <div class="report-card">
+              <div class="report-icon" style="background:rgba(245,158,11,0.1);color:var(--warning)"><i class="bi bi-file-earmark-medical"></i></div>
+              <div>
+                <div class="report-name">Transaction Anomaly Report – Nov 2024</div>
+                <div class="report-date">Generated · 2024-11-18 · 2.1MB</div>
+              </div>
+              <span class="tag tag-warn ms-2">Risk Alert</span>
+              <div class="report-actions">
+                <button class="report-btn-sm"><i class="bi bi-eye me-1"></i>View</button>
+                <button class="report-btn-sm"><i class="bi bi-download me-1"></i>Export</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ████ SIMULATION ████ -->
+  <section class="page-section" id="sec-simulation">
+    <div class="page-header">
+      <div class="page-title">Portfolio Simulation</div>
+      <div class="page-subtitle">Run AI-powered scenario simulations to model sustainability and financial outcomes</div>
+    </div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-5">
+        <div class="kpi-card" style="padding:26px">
+          <div class="section-title mb-4"><i class="bi bi-sliders text-success me-2"></i>Simulation Parameters</div>
+          <div style="margin-bottom:18px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px">Climate Scenario</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn-primary-custom" style="padding:7px 14px;font-size:12px">1.5°C</button>
+              <button class="btn-ghost" style="padding:7px 14px;font-size:12px">2°C</button>
+              <button class="btn-ghost" style="padding:7px 14px;font-size:12px">3°C (BAU)</button>
+            </div>
+          </div>
+          <div style="margin-bottom:18px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px">Carbon Price ($/tonne CO₂)</label>
+            <input type="range" min="20" max="200" value="85" style="width:100%;accent-color:var(--emerald)" id="carbonSlider" oninput="document.getElementById('carbonVal').textContent=this.value">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted)"><span>$20</span><span style="color:var(--emerald);font-weight:600" id="carbonVal">$85</span><span>$200</span></div>
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:8px">Time Horizon</label>
+            <div style="display:flex;gap:8px">
+              <button class="btn-ghost" style="padding:7px 14px;font-size:12px">1Y</button>
+              <button class="btn-primary-custom" style="padding:7px 14px;font-size:12px">5Y</button>
+              <button class="btn-ghost" style="padding:7px 14px;font-size:12px">10Y</button>
+              <button class="btn-ghost" style="padding:7px 14px;font-size:12px">20Y</button>
+            </div>
+          </div>
+          <button class="upload-btn w-100" style="justify-content:center">
+            <i class="bi bi-lightning-charge-fill"></i> Run Simulation
+          </button>
+        </div>
+      </div>
+      <div class="col-12 col-lg-7">
+        <div class="chart-card h-100">
+          <div class="chart-header">
+            <div><div class="chart-title">5-Year Scenario Projection</div><div class="chart-desc">ESG Score trajectory under selected climate scenario</div></div>
+            <span class="chart-badge">1.5°C · 5Y</span>
+          </div>
+          <div style="position:relative;height:280px"><canvas id="chartSim"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ── NAVIGATION ── */
+function showSection(id) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('sec-' + id);
+  if (el) el.classList.add('active');
+  // sidebar highlight
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(id)) item.classList.add('active');
+  });
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+  // trigger section-specific init
+  if (id === 'dashboard') initDashboard();
+  if (id === 'score') initScore();
+  if (id === 'riskanalysis') initRisk();
+  if (id === 'simulation') initSimulation();
+}
+
+/* ── HAMBURGER ── */
+document.getElementById('hamburgerBtn').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+});
+
+/* ── CHARTS ── */
+let charts = {};
+const palette = { emerald: '#0F766E', teal: '#14B8A6', lime: '#84CC16', danger: '#EF4444', warning: '#F59E0B', success: '#10B981', slate: '#1E293B' };
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.color = '#64748B';
+
+function makeGrad(ctx, color1, color2) {
+  const g = ctx.createLinearGradient(0, 0, 0, 200);
+  g.addColorStop(0, color1);
+  g.addColorStop(1, color2);
+  return g;
+}
+
+function initDashboard(data=null) {
+  // Ring
+  const score = data?.sustainability_score || 74;
+  const circ = 2 * Math.PI * 38;
+  const offset = circ - (score / 100) * circ;
+  setTimeout(() => { document.getElementById('ringFill').style.strokeDashoffset = offset; }, 100);
+
+  // Chart: Decline Rate
+  if (charts.decline) charts.decline.destroy();
+  const ctxD = document.getElementById('chartDecline').getContext('2d');
+  charts.decline = new Chart(ctxD, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets: [{
+        label: 'Decline Rate %',
+        data: data?.decline_trend || [4.2,4.8,5.1,4.7,5.5,6.1,5.8,5.3,4.9,5.2,5.6,5.3],
+        borderColor: palette.danger, borderWidth: 2,
+        backgroundColor: 'rgba(239,68,68,0.08)', fill: true,
+        tension: 0.4, pointRadius: 3, pointBackgroundColor: palette.danger
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 1200 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, callback: v => v + '%' } }
+      }
+    }
+  });
+
+  // Chart: Settlement
+  if (charts.settle) charts.settle.destroy();
+  const ctxS = document.getElementById('chartSettlement').getContext('2d');
+  charts.settle = new Chart(ctxS, {
+    type: 'bar',
+    data: {
+      labels: ['D+0','D+1','D+2','D+3','D+4','D+5+'],
+      datasets: [{
+        label: 'Transactions',
+        data: [1840, 12400, 18200, 9800, 4200, 1850],
+        backgroundColor: [palette.lime, palette.teal, palette.teal, palette.warning, palette.warning, palette.danger],
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 1200 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  // Chart: Volume
+  if (charts.volume) charts.volume.destroy();
+  const ctxV = document.getElementById('chartVolume').getContext('2d');
+  const gradG = ctxV.createLinearGradient(0, 0, 0, 160);
+  gradG.addColorStop(0, 'rgba(15,118,110,0.35)'); gradG.addColorStop(1, 'rgba(15,118,110,0)');
+  const gradT = ctxV.createLinearGradient(0, 0, 0, 160);
+  gradT.addColorStop(0, 'rgba(20,184,166,0.25)'); gradT.addColorStop(1, 'rgba(20,184,166,0)');
+  const days = Array.from({length:30}, (_,i) => (i+1)+'');
+  charts.volume = new Chart(ctxV, {
+    type: 'line',
+    data: {
+      labels: days,
+      datasets: [
+        { label: 'Sustainable', data: Array.from({length:30}, (_,i) => 800+Math.sin(i*0.4)*120+Math.random()*80+i*15), borderColor: palette.emerald, borderWidth: 2, backgroundColor: gradG, fill: true, tension: 0.4, pointRadius: 0 },
+        { label: 'Non-Sustainable', data: Array.from({length:30}, (_,i) => 600+Math.cos(i*0.3)*80+Math.random()*60+i*8), borderColor: palette.teal, borderWidth: 2, backgroundColor: gradT, fill: true, tension: 0.4, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 1500 },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, maxTicksLimit: 10 } },
+        y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function initRisk() {
+  if (charts.risk) charts.risk.destroy();
+  const ctxR = document.getElementById('chartRisk').getContext('2d');
+  charts.risk = new Chart(ctxR, {
+    type: 'radar',
+    data: {
+      labels: ['Energy','Real Estate','Industrials','Finance','Technology','Green Bonds'],
+      datasets: [
+        { label: 'Current Period', data: [82,61,57,43,28,14], borderColor: palette.danger, backgroundColor: 'rgba(239,68,68,0.12)', borderWidth: 2, pointBackgroundColor: palette.danger, pointRadius: 4 },
+        { label: 'Previous Period', data: [70,55,60,40,32,18], borderColor: palette.teal, backgroundColor: 'rgba(20,184,166,0.08)', borderWidth: 2, pointBackgroundColor: palette.teal, pointRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 1200 },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } } },
+      scales: { r: { min: 0, max: 100, ticks: { font: { size: 9 }, stepSize: 25 }, grid: { color: 'rgba(0,0,0,0.06)' }, pointLabels: { font: { size: 11 } } } }
+    }
+  });
+}
+
+function initScore() {
+  // Gauge
+  const score = 74;
+  const circ = 2 * Math.PI * 80;
+  const offset = circ - (score / 100) * circ;
+  setTimeout(() => {
+    document.getElementById('gaugeCircle').style.strokeDashoffset = offset;
+    // Count up
+    let n = 0; const interval = setInterval(() => { if (n >= score) clearInterval(interval); document.getElementById('gaugeNum').textContent = Math.min(n, score); n += 2; }, 30);
+    // Pillars
+    setTimeout(() => {
+      document.getElementById('pillarE').style.width = '79%';
+      document.getElementById('pillarS').style.width = '71%';
+      document.getElementById('pillarG').style.width = '68%';
+      document.getElementById('pillarC').style.width = '62%';
+      document.getElementById('pillarI').style.width = '85%';
+    }, 300);
+  }, 100);
+}
+
+function initSimulation() {
+  if (charts.sim) charts.sim.destroy();
+  const ctxSim = document.getElementById('chartSim').getContext('2d');
+  const gradSim = ctxSim.createLinearGradient(0, 0, 0, 280);
+  gradSim.addColorStop(0, 'rgba(15,118,110,0.3)'); gradSim.addColorStop(1, 'rgba(15,118,110,0)');
+  charts.sim = new Chart(ctxSim, {
+    type: 'line',
+    data: {
+      labels: ['2024','2025','2026','2027','2028','2029'],
+      datasets: [
+        { label: '1.5°C Scenario', data: [74,78,82,86,89,92], borderColor: palette.lime, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: palette.lime, tension: 0.3 },
+        { label: 'BAU (3°C)', data: [74,72,69,65,61,58], borderColor: palette.danger, backgroundColor: 'transparent', borderWidth: 2, borderDash: [6,4], pointRadius: 4, pointBackgroundColor: palette.danger, tension: 0.3 },
+        { label: 'Current Trajectory', data: [74,76,79,82,85,88], borderColor: palette.teal, backgroundColor: gradSim, fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: palette.teal, tension: 0.3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 1400 },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 } } },
+        y: { min: 50, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+/* ── FILE UPLOAD ── */
+let selectedFile = null;
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+function handleFile(file) {
+  selectedFile = file;
+
+  const preview = document.getElementById('filePreview');
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  preview.classList.add('show');
+  document.getElementById('uploadBtn').disabled = false;
+}
+document.getElementById('fileRemove').addEventListener('click', resetUpload);
+function resetUpload() {
+  selectedFile = null;
+  document.getElementById('filePreview').classList.remove('show');
+  document.getElementById('uploadProgress').classList.remove('show');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('uploadBtn').disabled = true;
+  fileInput.value = '';
+}
+async function uploadFile() {
+
+  const file = selectedFile;
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const prog = document.getElementById('uploadProgress');
+  const fill = document.getElementById('progressFill');
+  const btn = document.getElementById('uploadBtn');
+
+  prog.classList.add('show');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing…';
+
+  fill.style.width = "40%";
+
+  const res = await fetch("/analyze", {
+    method: "POST",
+    body: formData
+});
+
+  const data = await res.json();
+
+  fill.style.width = "100%";
+
+  btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Analysis Complete';
+
+  updateDashboard(data);
+
+  setTimeout(() => {
+      showSection("dashboard");
+  }, 800);
+}
+function animateScore(element, target) {
+
+  let current = 0;
+
+  const interval = setInterval(() => {
+
+      current += Math.ceil(target / 20);
+
+      if(current >= target){
+          current = target;
+          clearInterval(interval);
+      }
+
+      element.textContent = current;
+
+  }, 30);
+
+}
+function updateDashboard(data){
+
+  /* ---------------- SCORE ---------------- */
+
+  if(data.sustainability_score){
+
+      const score = data.sustainability_score;
+
+      const scoreElement = document.getElementById("scoreMain");
+      animateScore(scoreElement, score);
+
+      const circ = 2 * Math.PI * 38;
+      const offset = circ - (score / 100) * circ;
+      document.getElementById("ringFill").style.strokeDashoffset = offset;
+  }
+
+
+  /* ---------------- RISK ---------------- */
+
+  if(data.confidence && data.confidence.confidence_level){
+
+      const risk = data.confidence.confidence_level;
+
+      const riskEl = document.querySelector(".risk-level");
+      const marker = document.getElementById("riskMarker");
+
+      riskEl.textContent = risk;
+
+      if(risk === "LOW"){
+          riskEl.style.color = "var(--success)";
+          marker.style.left = "15%";
+      }
+
+      if(risk === "MEDIUM"){
+          riskEl.style.color = "var(--warning)";
+          marker.style.left = "45%";
+      }
+
+      if(risk === "HIGH"){
+          riskEl.style.color = "var(--danger)";
+          marker.style.left = "80%";
+      }
+  }
+
+
+  /* ---------------- ANOMALIES ---------------- */
+
+  if(data.anomalies && data.anomalies.length){
+
+      const anomalyBox = document.getElementById("anomalyCard");
+      const anomalyTag = anomalyBox.querySelector(".tag-danger");
+
+      anomalyTag.textContent = data.anomalies.length + " Active";
+
+      const items = anomalyBox.querySelectorAll(".anomaly-item");
+      items.forEach(e => e.remove());
+
+data.anomalies.slice(0,4).forEach(a => {
+
+    const text = a.message || a.feature || a.reason || JSON.stringify(a);
+
+    const div = document.createElement("div");
+    div.className = "anomaly-item";
+
+    const dot = document.createElement("div");
+    dot.className = "anomaly-dot";
+    dot.style.background = "var(--danger)";
+
+    const textDiv = document.createElement("div");
+    textDiv.className = "anomaly-text";
+    textDiv.textContent = text;
+
+    const badge = document.createElement("span");
+    badge.className = "badge-sev badge-high";
+    badge.textContent = a.severity ? a.severity.toUpperCase() : "HIGH";
+
+    div.appendChild(dot);
+    div.appendChild(textDiv);
+    div.appendChild(badge);
+    anomalyBox.appendChild(div);
+});
+  }
+
+
+  /* ---------------- AI INSIGHT ---------------- */
+
+  if(data.root_cause){
+
+      const insight = document.querySelector(".insight-text");
+
+      if(insight) insight.textContent = data.root_cause;
+
+  }
+
+}
+
+/* ── INIT ── */
+initDashboard();
+</script>
+</body>
+</html>
