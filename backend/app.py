@@ -3,6 +3,20 @@ from flask_cors import CORS
 import os
 import pandas as pd
 
+# -------- AGENTS --------
+from agents.report_understanding import understand_report
+from agents.anomaly_detection import detect_anomalies
+from agents.intent_classifier import classify_intent
+from agents.root_cause_reasoning import explain_root_cause
+from agents.action_recommendation import recommend_actions
+from agents.counterfactual_simulation import simulate_counterfactual
+from agents.decision_confidence import assess_decision_confidence
+from agents.agent_logger import log_agent_step
+
+# -------- RAG --------
+from rag.embed import embed_texts
+from rag.retrieve import retrieve_context
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(
